@@ -358,6 +358,7 @@ typedef struct {
     unsigned int flankinglength;
     int          HTMLoff;
     int          redundoff;
+	int          bedon;
     int          ngs;
     int          use_stdin;
     unsigned int maxwraplength;

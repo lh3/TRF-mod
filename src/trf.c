@@ -86,7 +86,7 @@ int main_mod(int, char**);
 
 int main(int ac, char** av)
 {
-	if (strstr(av[0], "-mod") != 0)
+	if (strstr(av[0], "trf") - av[0] != strlen(av[0]) - 3)
 		return main_mod(ac, av);
 	/* Handle a lone -v argument ourselves */
 	if ( (ac == 2) && ((strcmp(av[1], "-v") == 0) || (strcmp(av[1], "-V") == 0)) ) {
@@ -316,12 +316,17 @@ static void usage_mod(FILE *fp)
 	fprintf(stderr, "  -a INT     Match = matching weight [%d]\n", paramset.match);
 	fprintf(stderr, "  -b INT     Mismatch = mismatching penalty [%d]\n", paramset.match);
 	fprintf(stderr, "  -d INT     Delta = indel penalty [%d]\n", paramset.indel);
-	fprintf(stderr, "  -A INT     PM = match probability (whole number) [%d]\n", paramset.PM);
+	fprintf(stderr, "  -A INT     PM = match probability (whole number; 75 or 80) [%d]\n", paramset.PM);
 	fprintf(stderr, "  -D INT     PI = indel probability (whole number) [%d]\n", paramset.PI);
 	fprintf(stderr, "  -s INT     Minscore = minimum alignment score to report [%d]\n", paramset.minscore);
-	fprintf(stderr, "  -p INT     MaxPeriod = maximum period size to report [1,2000] [%d]\n", paramset.maxperiod);
-	fprintf(stderr, "  -n         enable 'ngs' output\n");
-	fprintf(stderr, "  -H         enable HTML output\n");
+	fprintf(stderr, "  -p INT     MaxPeriod = maximum period size to report, within [1,2000] [%d]\n", paramset.maxperiod);
+	fprintf(stderr, "  -n         output in the TRF NGS format\n");
+	fprintf(stderr, "  -H         output in the HTML format\n");
+	fprintf(stderr, "Notes:\n");
+	fprintf(stderr, "  BED output format (NB: length of pattern may differ from period):\n");
+	fprintf(stderr, "    ctg start end period copyNum fracMatch fracGap score entroy pattern\n");
+	fprintf(stderr, "  TRF NGS output format:\n");
+	fprintf(stderr, "    start end period copyNum patLen %%Match %%Gap score %%A %%C %%G %%T entroy pattern seq\n");
 }
 
 int main_mod(int argc, char** argv)
@@ -335,15 +340,16 @@ int main_mod(int argc, char** argv)
 	paramset.maskedfile = 0;
 	paramset.flankingsequence = 0;
 	paramset.flankinglength = 500; /* Currently not user-configurable */
+	paramset.bedon = 1;
 	paramset.HTMLoff = 1;
 	paramset.redundoff = 0;
 	paramset.maxwraplength = 2000000;
-	paramset.ngs = 0; /* this is for unix systems only */
+	paramset.ngs = 1; /* this is for unix systems only */
 	paramset.guihandle=0;
 
 	paramset.match = 2;
 	paramset.mismatch = 3;
-	paramset.indel = 4;
+	paramset.indel = 5;
 	paramset.PM = 75;
 	paramset.PI = 10;
 	paramset.minscore = 100;
@@ -357,7 +363,7 @@ int main_mod(int argc, char** argv)
 		else if (c == 'h') paramset.HTMLoff = 1;
 		else if (c == 'H') paramset.HTMLoff = 0;
 		else if (c == 'r') paramset.redundoff = 1;
-		else if (c == 'n') paramset.ngs = 1;
+		else if (c == 'n') paramset.ngs = 1, paramset.bedon = 0;
 		else if (c == 'l') {
 			if ((atol(o.arg) < 1)){
 				fprintf(stderr, "Error: max TR length must be at least 1 million\n");

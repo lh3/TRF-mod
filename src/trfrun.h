@@ -117,6 +117,20 @@ void SetProgressBar(void);
 extern void set_progress_bar( double fraction );
 #endif
 
+static int trf_print_bed(FILE *fp, const char *hdr, const IL *head)
+{
+	int i, name_len, n = 0;
+	const IL *p;
+	for (i = 0; hdr[i] != 0 && hdr[i] != ' ' && hdr[i] != '\t'; ++i) {}
+	name_len = i;
+	for (p = head; p; p = p->next) {
+		fprintf(fp, "%.*s\t%d\t%d\t%d\t%.2f\t%.2f\t%.2f\t%d\t%.2f\t%s\n", name_len, hdr, p->first - 1, p->last,
+				p->period, p->copies, p->matches * .01, p->indels * .01, p->score, p->entropy, p->pattern);
+		++n;
+	}
+	return n;
+}
+
 /***********************************************
  *   This routine can act on a multiple-sequence
  *   file and calls TRF() routine as many times
@@ -242,7 +256,10 @@ void TRFControlRoutine(void)
 
 				//fprintf(destdfp,"\n\n%s%s",hsequence, hparameters);
 
-				if (paramset.ngs) {
+				if (paramset.bedon) {
+					tr_count += trf_print_bed(stdout, seq.name, GlobalIndexList);
+					goto trf_end_print1;
+				} else if (paramset.ngs) {
 
 					/* only print if we have at least 1 record */
 					if (NULL!=GlobalIndexList) {
@@ -295,8 +312,7 @@ void TRFControlRoutine(void)
 					fprintf(destdfp,"\n");
 					++tr_count;
 				}
-
-
+trf_end_print1:	do {} while (0);
 			} 
 
 		}
@@ -449,7 +465,10 @@ void TRFControlRoutine(void)
 
 				//fprintf(destdfp,"\n\n%s%s",hsequence, hparameters);
 
-				if (paramset.ngs) {
+				if (paramset.bedon) {
+					tr_count += trf_print_bed(stdout, seq.name, GlobalIndexList);
+					goto trf_end_print_all;
+				} else if (paramset.ngs) {
 
 					/* only print if we have at least 1 record */
 					if (NULL!=GlobalIndexList) {
@@ -501,8 +520,7 @@ void TRFControlRoutine(void)
 					
 					fprintf(destdfp,"\n");
 				}
-
-
+trf_end_print_all: do {} while (0);
 			} 
 
 		}

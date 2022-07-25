@@ -23,7 +23,7 @@ trf-mod:$(OBJS)
 		$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 
 clean:
-		rm -fr gmon.out *.o a.out $(PROG) *~ *.a *.dSYM
+		rm -fr gmon.out src/*.o a.out $(PROG) *~ *.dSYM
 
 depend:
 		(LC_ALL=C; export LC_ALL; makedepend -Y -f compile.mak -- $(CFLAGS) $(DFLAGS) -- src/*.c)
