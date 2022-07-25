@@ -48,7 +48,7 @@ int counterInSeq = 0;
 //       defined( UNIXCONSOLE ) ) == 0
 // #pragma message( \
 //   "You forgot to define a platform when compiling. Setting UNIXCONSOLE." )
-#if __unix__
+#if __unix__ || __APPLE__
 #define UNIXCONSOLE
 #undef WINDOWSGUI
 #undef WINDOWSCONSOLE

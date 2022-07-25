@@ -9,3 +9,5 @@ Debug/
 .vstags
 build/
 autom4te.cache/
+.*.swp
+*.o
