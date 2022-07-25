@@ -313,15 +313,22 @@ static void usage_mod(FILE *fp)
 {
 	fprintf(stderr, "Usage: trf-mod [options] <in.fa>\n");
 	fprintf(stderr, "Options:\n");
-	fprintf(stderr, "  -a INT     Match = matching weight [%d]\n", paramset.match);
-	fprintf(stderr, "  -b INT     Mismatch = mismatching penalty [%d]\n", paramset.match);
-	fprintf(stderr, "  -d INT     Delta = indel penalty [%d]\n", paramset.indel);
-	fprintf(stderr, "  -A INT     PM = match probability (whole number; 75 or 80) [%d]\n", paramset.PM);
-	fprintf(stderr, "  -D INT     PI = indel probability (whole number) [%d]\n", paramset.PI);
-	fprintf(stderr, "  -s INT     Minscore = minimum alignment score to report [%d]\n", paramset.minscore);
-	fprintf(stderr, "  -p INT     MaxPeriod = maximum period size to report, within [1,2000] [%d]\n", paramset.maxperiod);
-	fprintf(stderr, "  -n         output in the TRF NGS format\n");
-	fprintf(stderr, "  -H         output in the HTML format\n");
+	fprintf(stderr, "  Parameters:\n");
+	fprintf(stderr, "    -a INT     Match = matching weight [%d]\n", paramset.match);
+	fprintf(stderr, "    -b INT     Mismatch = mismatching penalty [%d]\n", paramset.match);
+	fprintf(stderr, "    -g INT     Delta = indel penalty [%d]\n", paramset.indel);
+	fprintf(stderr, "    -A INT     PM = match probability (whole number; 75 or 80) [%d]\n", paramset.PM);
+	fprintf(stderr, "    -G INT     PI = indel probability (whole number) [%d]\n", paramset.PI);
+	fprintf(stderr, "    -s INT     Minscore = minimum alignment score to report [%d]\n", paramset.minscore);
+	fprintf(stderr, "    -p INT     MaxPeriod = maximum period size to report, within [1,2000] [%d]\n", paramset.maxperiod);
+	fprintf(stderr, "    -l INT     maximum TR length expected (in millions) [%d]\n", (int)(paramset.maxwraplength*1e-6+.499));
+	fprintf(stderr, "  Alternative output formats:\n");
+	fprintf(stderr, "    -h         output in the HTML format\n");
+	fprintf(stderr, "    -n         output in the TRF NGS format\n");
+	fprintf(stderr, "    -d         output in the TRF dat format\n");
+	fprintf(stderr, "    -m         output masked sequence file\n");
+	fprintf(stderr, "    -r         no redundancy elimination (not sure what it means)\n");
+	fprintf(stderr, "    -v         print versioning information\n");
 	fprintf(stderr, "Notes:\n");
 	fprintf(stderr, "  BED output format (NB: length of pattern may differ from period):\n");
 	fprintf(stderr, "    ctg start end period copyNum fracMatch fracGap score entroy pattern\n");
@@ -355,13 +362,12 @@ int main_mod(int argc, char** argv)
 	paramset.minscore = 100;
 	paramset.maxperiod = 2000;
 
-	while ((c = ketopt(&o, argc, argv, 1, "uvdnmfhHrl:a:b:d:A:D:s:p:", 0)) >= 0) {
+	while ((c = ketopt(&o, argc, argv, 1, "uvdnmfhrl:a:b:g:A:G:s:p:", 0)) >= 0) {
 		if (c == 'v') { PrintBanner(); exit(0); }
-		else if (c == 'd') paramset.datafile = 1;
+		else if (c == 'd') paramset.datafile = 1, paramset.ngs = paramset.bedon = 0;
 		else if (c == 'm') paramset.maskedfile = 1;
 		else if (c == 'f') paramset.flankingsequence = 1;
-		else if (c == 'h') paramset.HTMLoff = 1;
-		else if (c == 'H') paramset.HTMLoff = 0;
+		else if (c == 'h') paramset.HTMLoff = 0, paramset.ngs = paramset.bedon = 0;
 		else if (c == 'r') paramset.redundoff = 1;
 		else if (c == 'n') paramset.ngs = 1, paramset.bedon = 0;
 		else if (c == 'l') {
@@ -386,7 +392,7 @@ int main_mod(int argc, char** argv)
 				paramset.endstatus = "Error parsing mismatch parameter."
 					" Value must be a positive integer.";
 			}
-		} else if (c == 'd') {
+		} else if (c == 'g') {
 			if (ParseUInt(o.arg, &paramset.indel) == 0) {
 				paramset.endstatus = "Error parsing indel parameter."
 					" Value must be a positive integer.";
@@ -396,7 +402,7 @@ int main_mod(int argc, char** argv)
 				paramset.endstatus = "Error parsing PM parameter."
 					" Value must be a positive integer.";
 			}
-		} else if (c == 'D') {
+		} else if (c == 'G') {
 			if (ParseUInt(o.arg, &paramset.PI) == 0) {
 				paramset.endstatus = "Error parsing PI parameter."
 					" Value must be a positive integer.";
@@ -541,6 +547,7 @@ void    PrintBanner(void)
 {
 	fprintf(stderr,"\nTandem Repeats Finder, Version %s", versionstring);
 	fprintf(stderr,"\nCopyright (C) Dr. Gary Benson 1999-2012. All rights reserved.\n");
+	fprintf(stderr,"\nModified by Heng Li for improved CLI and BED output.\n");
 
 	return;
 }
