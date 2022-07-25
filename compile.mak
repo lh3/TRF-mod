@@ -4,7 +4,7 @@ CPPFLAGS=
 INCLUDES=
 OBJS=		src/trf.o
 PROG=		trf-mod
-LIBS=		-lz
+LIBS=		-lm
 
 ifneq ($(asan),)
 	CFLAGS+=-fsanitize=address
