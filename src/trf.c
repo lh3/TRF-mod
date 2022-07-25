@@ -315,10 +315,10 @@ static void usage_mod(FILE *fp)
 	fprintf(stderr, "Options:\n");
 	fprintf(stderr, "  Parameters:\n");
 	fprintf(stderr, "    -a INT     Match = matching weight [%d]\n", paramset.match);
-	fprintf(stderr, "    -b INT     Mismatch = mismatching penalty [%d]\n", paramset.match);
+	fprintf(stderr, "    -b INT     Mismatch = mismatching penalty [%d]\n", paramset.mismatch);
 	fprintf(stderr, "    -g INT     Delta = indel penalty [%d]\n", paramset.indel);
 	fprintf(stderr, "    -A INT     PM = match probability (whole number; 75 or 80) [%d]\n", paramset.PM);
-	fprintf(stderr, "    -G INT     PI = indel probability (whole number) [%d]\n", paramset.PI);
+	fprintf(stderr, "    -G INT     PI = indel probability (whole number; 10 ro 20) [%d]\n", paramset.PI);
 	fprintf(stderr, "    -s INT     Minscore = minimum alignment score to report [%d]\n", paramset.minscore);
 	fprintf(stderr, "    -p INT     MaxPeriod = maximum period size to report, within [1,2000] [%d]\n", paramset.maxperiod);
 	fprintf(stderr, "    -l INT     maximum TR length expected (in millions) [%d]\n", (int)(paramset.maxwraplength*1e-6+.499));
@@ -355,11 +355,11 @@ int main_mod(int argc, char** argv)
 	paramset.guihandle=0;
 
 	paramset.match = 2;
-	paramset.mismatch = 3;
-	paramset.indel = 5;
-	paramset.PM = 75;
+	paramset.mismatch = 5;
+	paramset.indel = 7;
+	paramset.PM = 80;
 	paramset.PI = 10;
-	paramset.minscore = 100;
+	paramset.minscore = 50;
 	paramset.maxperiod = 2000;
 
 	while ((c = ketopt(&o, argc, argv, 1, "uvdnmfhrl:a:b:g:A:G:s:p:", 0)) >= 0) {

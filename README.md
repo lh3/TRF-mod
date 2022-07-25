@@ -1,3 +1,16 @@
+# TRF-mod
+
+TRF-mod is a modified version of [TRF][TRF] with the identical algorithm. It added a
+BED-like output format and an alternative command-line interface with default
+parameters. To use TRF-mod:
+
+```sh
+git clone https://github.com/lh3/TRF-mod
+cd TRF-mod && make -f compile.md
+./trf-mod t/small_test.fasta
+```
+
+
 # TRF
 **Tandem Repeats Finder:** https://tandem.bu.edu/trf/trf.html  
 **Tandem Repeats Database:** http://tandem.bu.edu/cgi-bin/trdb/trdb.exe
