@@ -1,6 +1,6 @@
 # TRF-mod
 
-TRF-mod is a modified version of [TRF][TRF] with the identical algorithm. It added a
+TRF-mod is a modified version of [TRF](#TRF) with the identical algorithm. It added a
 BED-like output format and an alternative command-line interface with default
 parameters. To use TRF-mod:
 
