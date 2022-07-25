@@ -32,6 +32,7 @@ License along with TRF.  If not, see <https://www.gnu.org/licenses/>.
 #include <errno.h> // ERANGE
 #include <limits.h> // LONG_MIN, LONG_MAX
 #include "trfrun.h" // paramset struct (via tr30dat.h), others
+#include "ketopt.h"
 
 const char *usage = "\n\nPlease use: %s File Match Mismatch Delta PM PI Minscore MaxPeriod [options]\n"
 "\nWhere: (all weights, penalties, and scores are positive)"
@@ -81,9 +82,12 @@ char* GetNamePartAddress(char* name);
 void PrintBanner(void);
 static int ParseInt(const char *str, int *dest);
 static int ParseUInt(const char *str, unsigned int *dest);
+int main_mod(int, char**);
 
 int main(int ac, char** av)
 {
+	if (strstr(av[0], "-mod") != 0)
+		return main_mod(ac, av);
 	/* Handle a lone -v argument ourselves */
 	if ( (ac == 2) && ((strcmp(av[1], "-v") == 0) || (strcmp(av[1], "-V") == 0)) ) {
 		PrintBanner();
@@ -305,6 +309,165 @@ int main(int ac, char** av)
 	}
 }
 
+static void usage_mod(FILE *fp)
+{
+	fprintf(stderr, "Usage: trf-mod [options] <in.fa>\n");
+	fprintf(stderr, "Options:\n");
+	fprintf(stderr, "  -a INT     Match = matching weight [%d]\n", paramset.match);
+	fprintf(stderr, "  -b INT     Mismatch = mismatching penalty [%d]\n", paramset.match);
+	fprintf(stderr, "  -d INT     Delta = indel penalty [%d]\n", paramset.indel);
+	fprintf(stderr, "  -A INT     PM = match probability (whole number) [%d]\n", paramset.PM);
+	fprintf(stderr, "  -D INT     PI = indel probability (whole number) [%d]\n", paramset.PI);
+	fprintf(stderr, "  -s INT     Minscore = minimum alignment score to report [%d]\n", paramset.minscore);
+	fprintf(stderr, "  -p INT     MaxPeriod = maximum period size to report [1,2000] [%d]\n", paramset.maxperiod);
+	fprintf(stderr, "  -n         enable 'ngs' output\n");
+	fprintf(stderr, "  -H         enable HTML output\n");
+}
+
+int main_mod(int argc, char** argv)
+{
+	ketopt_t o = KETOPT_INIT;
+	int c;
+
+	/* set option defaults */
+	paramset.use_stdin = 0;
+	paramset.datafile = 0;
+	paramset.maskedfile = 0;
+	paramset.flankingsequence = 0;
+	paramset.flankinglength = 500; /* Currently not user-configurable */
+	paramset.HTMLoff = 1;
+	paramset.redundoff = 0;
+	paramset.maxwraplength = 2000000;
+	paramset.ngs = 0; /* this is for unix systems only */
+	paramset.guihandle=0;
+
+	paramset.match = 2;
+	paramset.mismatch = 3;
+	paramset.indel = 4;
+	paramset.PM = 75;
+	paramset.PI = 10;
+	paramset.minscore = 100;
+	paramset.maxperiod = 2000;
+
+	while ((c = ketopt(&o, argc, argv, 1, "uvdnmfhHrl:a:b:d:A:D:s:p:", 0)) >= 0) {
+		if (c == 'v') { PrintBanner(); exit(0); }
+		else if (c == 'd') paramset.datafile = 1;
+		else if (c == 'm') paramset.maskedfile = 1;
+		else if (c == 'f') paramset.flankingsequence = 1;
+		else if (c == 'h') paramset.HTMLoff = 1;
+		else if (c == 'H') paramset.HTMLoff = 0;
+		else if (c == 'r') paramset.redundoff = 1;
+		else if (c == 'n') paramset.ngs = 1;
+		else if (c == 'l') {
+			if ((atol(o.arg) < 1)){
+				fprintf(stderr, "Error: max TR length must be at least 1 million\n");
+				PrintBanner();
+				exit(2);
+			}
+			if (ParseUInt(o.arg, &paramset.maxwraplength) == 0) {
+				fprintf(stderr, "Error while parsing max TR length (option '-L') value\n");
+				PrintBanner();
+				exit(1);
+			}
+			paramset.maxwraplength *= 1e6;
+		} else if (c == 'a') {
+			if (ParseUInt(o.arg, &paramset.match) == 0) {
+				paramset.endstatus = "Error parsing match parameter."
+					" Value must be a positive integer.";
+			}
+		} else if (c == 'b') {
+			if (ParseUInt(o.arg, &paramset.mismatch) == 0) {
+				paramset.endstatus = "Error parsing mismatch parameter."
+					" Value must be a positive integer.";
+			}
+		} else if (c == 'd') {
+			if (ParseUInt(o.arg, &paramset.indel) == 0) {
+				paramset.endstatus = "Error parsing indel parameter."
+					" Value must be a positive integer.";
+			}
+		} else if (c == 'A') {
+			if (ParseUInt(o.arg, &paramset.PM) == 0) {
+				paramset.endstatus = "Error parsing PM parameter."
+					" Value must be a positive integer.";
+			}
+		} else if (c == 'D') {
+			if (ParseUInt(o.arg, &paramset.PI) == 0) {
+				paramset.endstatus = "Error parsing PI parameter."
+					" Value must be a positive integer.";
+			}
+		} else if (c == 's') {
+			if (ParseUInt(o.arg, &paramset.minscore) == 0) {
+				paramset.endstatus = "Error parsing Minscore parameter."
+					" Value must be a positive integer.";
+			}
+		} else if (c == 'p') {
+			if ((ParseUInt(o.arg, &paramset.maxperiod) == 0) ||
+					(paramset.maxperiod > 2000) || (paramset.maxperiod == 0)) {
+				paramset.endstatus = "Error parsing MaxPeriod parameter."
+					" Value must be between 1 and 2000, inclusive.";
+			}
+		} else {
+			fprintf(stderr, "Error: unrecognized option\n");
+			exit(3);
+		}
+	}
+
+	if (o.ind == argc) {
+		usage_mod(stderr);
+		exit(1);
+	}
+
+	/* get input parameters */
+	strcpy(paramset.inputfilename,argv[o.ind]);
+	strcpy(paramset.outputprefix,GetNamePartAddress(argv[o.ind]));
+
+	/* Error if any validation failed */
+	if (paramset.endstatus) {
+		printf("%s\n\n", paramset.endstatus);
+		printf("Please run with -h for help, or visit https://tandem.bu.edu/trf/trf.unix.help.html\n");
+		exit(1);
+	}
+
+	// paramset.datafile must be set if HTMLoff is set
+	paramset.datafile |= paramset.HTMLoff;
+
+	if  (paramset.ngs == 1) {
+		paramset.datafile=1;
+	} else {
+		PrintBanner();
+	}
+
+#if (defined(UNIXGUI)+defined(UNIXCONSOLE))>=1
+	if (0==strcmp("-", argv[o.ind])) {
+		if (paramset.ngs) {
+			paramset.use_stdin = 1;
+			paramset.HTMLoff = 1;
+		} else {
+			fprintf(stderr,"\n\nPlease use -ngs flag if piping input into TRF");
+			fprintf(stderr,"\n");
+			exit(-1);
+		}
+	}
+#endif
+
+	/* call the fuction on trfrun.h that controls execution */
+	TRFControlRoutine();
+
+	/* Check the status by looking at the output count and the endstatus
+	   members of the paramset struct */
+	if (paramset.outputcount == 0 && !paramset.endstatus) {
+		/* If no TRs were found, print informative message to STDERR */
+		printf("No TRs found. Exiting...\n");
+		return 0;
+	}
+	else if (paramset.endstatus) {
+		printf("Error processing input: %s\n", paramset.endstatus);
+		return 1;
+	}
+	else {
+		return 0;
+	}
+}
 
 char* GetNamePartAddress(char* name)
 {
