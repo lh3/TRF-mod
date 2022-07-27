@@ -6,8 +6,8 @@ parameters. To use TRF-mod:
 
 ```sh
 git clone https://github.com/lh3/TRF-mod
-cd TRF-mod && make -f compile.md
-./trf-mod t/small_test.fasta
+cd TRF-mod && make -f compile.mak
+./trf-mod t/small_test.fasta > out.bed
 ```
 
 
