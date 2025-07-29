@@ -336,12 +336,12 @@ static void usage_mod(FILE *fp)
 	fprintf(stderr, "      start end period copyNum patLen %%Match %%Gap score %%A %%C %%G %%T entroy pattern seq\n");
 	fprintf(stderr, "  * Redundancy elimination is very slow for long SatDNA\n");
 	fprintf(stderr, "  * A large -l helps performance at the cost of memory\n");
-	fprintf(stderr, "  * The default setting is based on README on GitHub but with smaller -s and larger -l\n");
+	fprintf(stderr, "  * The default setting is based on README but with smaller -s and larger -l\n");
 	fprintf(stderr, "  * Other parameter setting:\n");
-	fprintf(stderr, "      TRF README on GitHub: -s50 (-l2 or -l10)\n");
-	fprintf(stderr, "      TRF website: -b7 -g7 -s50 -p500 -l2\n");
-	fprintf(stderr, "      TANTAN paper: -b5 -g5 -s30 -p200 -l2\n");
-	fprintf(stderr, "      ULTRA paper: -s30 -p500 -l12 (-b5 -g5 or -b7 -g7)\n");
+	fprintf(stderr, "      TRF README:   -s50 (-l2 or -l10)\n");
+	fprintf(stderr, "      TRF website:  -b7 -g7 -s50 -p500 [-l2]\n");
+	fprintf(stderr, "      TANTAN paper: -b5 -g5 -s30 -p200 [-l2]\n");
+	fprintf(stderr, "      ULTRA paper:  -s30 -p500 -l12 (-b5 -g5 or -b7 -g7)\n");
 }
 
 int main_mod(int argc, char** argv)
