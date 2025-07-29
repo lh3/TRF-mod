@@ -327,21 +327,20 @@ static void usage_mod(FILE *fp)
 	fprintf(stderr, "    -n         output in the TRF NGS format\n");
 	fprintf(stderr, "    -d         output in the TRF dat format\n");
 	fprintf(stderr, "    -m         output masked sequence file\n");
-	fprintf(stderr, "    -R         eliminate redundancy (SLOOOW for long SatDNA)\n");
+	fprintf(stderr, "    -r         don't eliminate redundancy\n");
 	fprintf(stderr, "    -v         print versioning information\n");
 	fprintf(stderr, "Notes:\n");
 	fprintf(stderr, "  * BED output format (NB: length of pattern may differ from period):\n");
 	fprintf(stderr, "      ctg start end period copyNum fracMatch fracGap score entroy pattern\n");
 	fprintf(stderr, "  * TRF NGS output format:\n");
 	fprintf(stderr, "      start end period copyNum patLen %%Match %%Gap score %%A %%C %%G %%T entroy pattern seq\n");
-	fprintf(stderr, "  * Redundancy elimination is very slow for long SatDNA\n");
-	fprintf(stderr, "  * A large -l helps performance at the cost of memory\n");
-	fprintf(stderr, "  * The default setting is based on README but with smaller -s and larger -l\n");
+	fprintf(stderr, "  * A larger -l helps performance at the cost of higher memory usage\n");
+	fprintf(stderr, "  * The default setting is based on Quick Start but with smaller -s and larger -l\n");
 	fprintf(stderr, "  * Other parameter setting:\n");
-	fprintf(stderr, "      TRF README:   -s50 (-l2 or -l10)\n");
-	fprintf(stderr, "      TRF website:  -b7 -g7 -s50 -p500 [-l2]\n");
-	fprintf(stderr, "      TANTAN paper: -b5 -g5 -s30 -p200 [-l2]\n");
-	fprintf(stderr, "      ULTRA paper:  -s30 -p500 -l12 (-b5 -g5 or -b7 -g7)\n");
+	fprintf(stderr, "      TRF Quick Start:    -s50 (-l2 or -l10)\n");
+	fprintf(stderr, "      TRF recommendation: -b7 -g7 -s50 -p500 [-l2]\n");
+	fprintf(stderr, "      TANTAN paper:       -b5 -g5 -s30 -p200 [-l2]\n");
+	fprintf(stderr, "      ULTRA paper:        -s30 -p500 -l12 (-b5 -g5 or -b7 -g7)\n");
 }
 
 int main_mod(int argc, char** argv)
@@ -357,7 +356,7 @@ int main_mod(int argc, char** argv)
 	paramset.flankinglength = 500; /* Currently not user-configurable */
 	paramset.bedon = 1;
 	paramset.HTMLoff = 1;
-	paramset.redundoff = 1;
+	paramset.redundoff = 0;
 	paramset.maxwraplength = 12000000;
 	paramset.ngs = 1; /* this is for unix systems only */
 	paramset.guihandle=0;
@@ -370,14 +369,13 @@ int main_mod(int argc, char** argv)
 	paramset.minscore = 30;
 	paramset.maxperiod = 2000;
 
-	while ((c = ketopt(&o, argc, argv, 1, "uvdnmfhrRl:a:b:g:A:G:s:p:", 0)) >= 0) {
+	while ((c = ketopt(&o, argc, argv, 1, "uvdnmfhrl:a:b:g:A:G:s:p:", 0)) >= 0) {
 		if (c == 'v') { PrintBanner(); exit(0); }
 		else if (c == 'd') paramset.datafile = 1, paramset.ngs = paramset.bedon = 0;
 		else if (c == 'm') paramset.maskedfile = 1;
 		else if (c == 'f') paramset.flankingsequence = 1;
 		else if (c == 'h') paramset.HTMLoff = 0, paramset.ngs = paramset.bedon = 0;
 		else if (c == 'r') paramset.redundoff = 1;
-		else if (c == 'R') paramset.redundoff = 0;
 		else if (c == 'n') paramset.ngs = 1, paramset.bedon = 0;
 		else if (c == 'l') {
 			if ((atol(o.arg) < 1)){
