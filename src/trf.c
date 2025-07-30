@@ -334,13 +334,13 @@ static void usage_mod(FILE *fp)
 	fprintf(stderr, "      ctg start end period copyNum fracMatch fracGap score entroy pattern\n");
 	fprintf(stderr, "  * TRF NGS output format:\n");
 	fprintf(stderr, "      start end period copyNum patLen %%Match %%Gap score %%A %%C %%G %%T entroy pattern seq\n");
-	fprintf(stderr, "  * A larger -l helps performance at the cost of higher memory usage\n");
-	fprintf(stderr, "  * The default setting is based on Quick Start but with smaller -s and larger -l\n");
+	fprintf(stderr, "  * Larger -l: faster but using more memory\n");
+	fprintf(stderr, "  * Smaller -b: more sensitive but slower\n");
+	fprintf(stderr, "  * The default setting is based on a setting in the ULTRA paper\n");
 	fprintf(stderr, "  * Other parameter setting:\n");
-	fprintf(stderr, "      TRF Quick Start:    -s50 (-l2 or -l10)\n");
-	fprintf(stderr, "      TRF recommendation: -b7 -g7 -s50 -p500 [-l2]\n");
-	fprintf(stderr, "      TANTAN paper:       -b5 -g5 -s30 -p200 [-l2]\n");
-	fprintf(stderr, "      ULTRA paper:        -s30 -p500 -l12 (-b5 -g5 or -b7 -g7)\n");
+	fprintf(stderr, "      TRF README (1): -b5 -g7 -s50 (-l2 or -l10)\n");
+	fprintf(stderr, "      TRF README (2): -b7 -g7 -s50 -p500 [-l2]\n");
+	fprintf(stderr, "      TANTAN paper:   -b5 -g5 -s30 -p200 [-l2]\n");
 }
 
 int main_mod(int argc, char** argv)
@@ -362,12 +362,12 @@ int main_mod(int argc, char** argv)
 	paramset.guihandle=0;
 
 	paramset.match = 2;
-	paramset.mismatch = 5;
+	paramset.mismatch = 7;
 	paramset.indel = 7;
 	paramset.PM = 80;
 	paramset.PI = 10;
 	paramset.minscore = 30;
-	paramset.maxperiod = 2000;
+	paramset.maxperiod = 500;
 
 	while ((c = ketopt(&o, argc, argv, 1, "uvdnmfhrl:a:b:g:A:G:s:p:", 0)) >= 0) {
 		if (c == 'v') { PrintBanner(); exit(0); }
